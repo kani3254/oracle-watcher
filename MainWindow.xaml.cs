@@ -29,18 +29,18 @@ namespace oracle
 
         private void Exec_Click(object sender, RoutedEventArgs e)
         {
-            string constr = "User Id=scott;Password=tiger;Data Source=oracle";
+            string constr = "User Id=KANI;Password=kanikani;Data Source=localhost/orcl";
             OracleConnection con = new OracleConnection(constr);
             con.Open();
 
             OracleCommand cmd = new OracleCommand(this.sqlText.Text, con);
-            
-            this.DataContext = new { X = cmd.ExecuteStream() };
+
+            Stream st = cmd.ExecuteStream();
+            this.DataContext = new { X = st };
 
             // Clean up
             cmd.Dispose();
             con.Dispose();
-
         }
 
     }
