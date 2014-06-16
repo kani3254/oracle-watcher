@@ -27,21 +27,5 @@ namespace oracle
             InitializeComponent();
         }
 
-        private void Exec_Click(object sender, RoutedEventArgs e)
-        {
-            string constr = "User Id=KANI;Password=kanikani;Data Source=localhost/orcl";
-            OracleConnection con = new OracleConnection(constr);
-            con.Open();
-
-            OracleCommand cmd = new OracleCommand(this.sqlText.Text, con);
-
-            Stream st = cmd.ExecuteStream();
-            this.DataContext = new { X = st };
-
-            // Clean up
-            cmd.Dispose();
-            con.Dispose();
-        }
-
     }
 }

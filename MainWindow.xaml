@@ -8,22 +8,23 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
-        </Grid.RowDefinitions><StackPanel />
+        </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Content="exec" HorizontalAlignment="Left" Width="75" Margin="5" Click="Exec_Click"/>
-            <TextBox x:Name="sqlText" Text="SQL" Margin="5" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Width="300" Height="50" AcceptsReturn="True"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <ComboBox x:Name="table" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME" SelectedValuePath="TABLE_NAME">
+            <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME"
+                      SelectedValuePath="TABLE_NAME"
+                      SelectedValue="{Binding DataContext.SelectTable, ElementName=dataGrid}">
                 <ComboBox.DataContext>
                     <local:OracleDataSet SqlText="select owner || '.' || table_name as TABLE_NAME from all_tables" />
                 </ComboBox.DataContext>
             </ComboBox>
-            <TextBox Margin="5" Text="{Binding SelectedValue, ElementName=table}" />
+            <TextBox Text="{Binding DataContext.SqlText, ElementName=TableSelector}" Margin="5" />
         </StackPanel>
-        <DataGrid Grid.Row="2" ItemsSource="{Binding TableData}" >
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBox Text="{Binding DataContext.SqlText, ElementName=dataGrid}" Margin="5" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="50" AcceptsReturn="True" />
+        </StackPanel>
+        <DataGrid x:Name="dataGrid" Grid.Row="2" ItemsSource="{Binding TableData}" Margin="5" >
             <DataGrid.DataContext>
-                <local:OracleDataSet SqlText="{Binding SelectedValue, ElementName=table}"/>
+                <local:OracleDataSet/>
             </DataGrid.DataContext>
         </DataGrid>
 
