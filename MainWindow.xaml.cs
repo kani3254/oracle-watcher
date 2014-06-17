@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace oracle
 {
@@ -11,6 +13,9 @@ namespace oracle
         public MainWindow()
         {
             InitializeComponent();
+            DefaultTimer ti = this.timer.DataContext as DefaultTimer;
+            OracleDataSet ds = this.dataGrid.DataContext as OracleDataSet;
+            ti.Timer.Tick += new EventHandler(ds.EventHandler);
         }
 
         public void TextAllSelect(object o, RoutedEventArgs e)

@@ -12,7 +12,11 @@ namespace oracle
         private OracleDataAdapter adapter = null;
         private OracleConnectionManager conMgr = OracleConnectionManager.Instance;
 
-        private string constr = "User Id=KANI;Password=kanikani;Data Source=localhost/orcl";
+        private void OnConnectionChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "Connection") return;
+            Reset();
+        }
 
         // SQL文字列を格納するプロパティ
         public static readonly DependencyProperty SqlTextProperty =
@@ -32,7 +36,7 @@ namespace oracle
 
             if (oracleDataSet != null)
             {
-                oracleDataSet.Refresh();
+                oracleDataSet.Reset();
             }
         }
 
@@ -63,9 +67,10 @@ namespace oracle
         {
             get
             {
-                if (adapter == null) Refresh();
+                if (adapter == null) Reset();
                 try
                 {
+                    dataset.Clear();
                     adapter.Fill(dataset, "TABLE");
                     return dataset.Tables["TABLE"].DefaultView;
                 }
@@ -77,24 +82,23 @@ namespace oracle
             }
         }
 
-        private void Refresh()
+        public OracleDataSet()
         {
-            // DataSet を初期化して DataAdapter を再セット
+            conMgr.PropertyChanged += OnConnectionChanged;
+        }
+
+        public void EventHandler(object sender, EventArgs e)
+        {
+            NotifyPropertyChanged("TableData");
+        }
+
+        // DataSet を初期化して DataAdapter を再セット
+        private void Reset()
+        {
             dataset.Dispose();
             dataset = new DataSet();
             adapter = new OracleDataAdapter(SqlText, conMgr.Connection);
             NotifyPropertyChanged("TableData");
-        }
-
-        private void OnConnectionChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName != "Connection") return;
-            Refresh();
-        }
-
-        public OracleDataSet()
-        {
-            conMgr.PropertyChanged += OnConnectionChanged;
         }
 
         private void NotifyPropertyChanged(string propertyName)

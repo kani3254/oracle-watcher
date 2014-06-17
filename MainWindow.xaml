@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -23,7 +24,7 @@
             <TextBox Text="{Binding UserID}" Margin="5" MinWidth="50" />
             <TextBox Text="{Binding Password}" Margin="5" MinWidth="50" />
             <TextBox Text="{Binding Ezconstr}" Margin="5" MinWidth="200" />
-            <Button Content="つなぐ" Margin="5" Width="75" Command="{Binding}"/>
+            <Button Content="つなぐ" Margin="5" Width="75" Command="{Binding Mode=OneWay}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME"
@@ -38,12 +39,20 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBox Text="{Binding DataContext.SqlText, ElementName=dataGrid}" Margin="5" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="50" AcceptsReturn="True" />
         </StackPanel>
-        <DataGrid x:Name="dataGrid" Grid.Row="3" ItemsSource="{Binding TableData}" Margin="5" >
+        <StackPanel Name="timer" Grid.Row="3" Orientation="Horizontal">
+            <StackPanel.DataContext>
+                <local:DefaultTimer/>
+            </StackPanel.DataContext>
+            <TextBlock Text="Interval" Margin="5"/>
+            <TextBox Text="{Binding Timer.Interval}" Margin="5"/>
+            <Button Content="ぐるぐる" Margin="5" Width="75" Command="{Binding Mode=OneWay}"/>
+        </StackPanel>
+        <DataGrid x:Name="dataGrid" Grid.Row="4" ItemsSource="{Binding TableData}" Margin="5" >
             <DataGrid.DataContext>
                 <local:OracleDataSet/>
             </DataGrid.DataContext>
         </DataGrid>
-        <TextBlock Grid.Row="4" Text="{Binding Message}" />
+        <TextBlock Grid.Row="5" Text="{Binding Message}" />
 
     </Grid>
 </Window>
