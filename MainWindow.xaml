@@ -3,13 +3,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:oracle" x:Class="oracle.MainWindow"
         Title="ちら美" Height="350" Width="525">
+    <Window.DataContext>
+        <Binding Source="{x:Static local:OracleConnectionManager.Instance}" />
+    </Window.DataContext>
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}">
+            <EventSetter Event="GotFocus" Handler="TextAllSelect" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBox Text="{Binding UserID}" Margin="5" MinWidth="50" />
+            <TextBox Text="{Binding Password}" Margin="5" MinWidth="50" />
+            <TextBox Text="{Binding Ezconstr}" Margin="5" MinWidth="200" />
+            <Button Content="つなぐ" Margin="5" Width="75" Command="{Binding}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME"
                       SelectedValuePath="TABLE_NAME"
                       SelectedValue="{Binding DataContext.SelectTable, ElementName=dataGrid}">
@@ -19,14 +35,15 @@
             </ComboBox>
             <TextBox Text="{Binding DataContext.SqlText, ElementName=TableSelector}" Margin="5" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBox Text="{Binding DataContext.SqlText, ElementName=dataGrid}" Margin="5" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="50" AcceptsReturn="True" />
         </StackPanel>
-        <DataGrid x:Name="dataGrid" Grid.Row="2" ItemsSource="{Binding TableData}" Margin="5" >
+        <DataGrid x:Name="dataGrid" Grid.Row="3" ItemsSource="{Binding TableData}" Margin="5" >
             <DataGrid.DataContext>
                 <local:OracleDataSet/>
             </DataGrid.DataContext>
         </DataGrid>
+        <TextBlock Grid.Row="4" Text="{Binding Message}" />
 
     </Grid>
 </Window>

@@ -1,10 +1,7 @@
 ﻿using Oracle.DataAccess.Client;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows;
 
 namespace oracle
@@ -13,6 +10,7 @@ namespace oracle
     {
         private DataSet dataset = new DataSet();
         private OracleDataAdapter adapter = null;
+        private OracleConnectionManager conMgr = OracleConnectionManager.Instance;
 
         private string constr = "User Id=KANI;Password=kanikani;Data Source=localhost/orcl";
 
@@ -34,13 +32,7 @@ namespace oracle
 
             if (oracleDataSet != null)
             {
-                // DataSet を初期化して DataAdapter を再セット
-                String newValue = (String)e.NewValue;
-                oracleDataSet.dataset.Dispose();
-                oracleDataSet.dataset = new DataSet();
-                oracleDataSet.adapter = new OracleDataAdapter(newValue, oracleDataSet.constr);
-                // TableData が変更されたことを通知する
-                oracleDataSet.NotifyPropertyChanged("TableData");
+                oracleDataSet.Refresh();
             }
         }
 
@@ -54,7 +46,7 @@ namespace oracle
             set { SetValue(SelectTableProperty, value); }
         }
 
-        // テーブル名 が変更されたときに OracleDataAdapter を作成しなおす
+        // テーブル名 が変更されたときに SqlText を作成しなおす
         private static void OnSelectTableChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             OracleDataSet oracleDataSet = obj as OracleDataSet;
@@ -66,32 +58,45 @@ namespace oracle
             }
         }
 
-
-        //public OracleDataSet()
-        //{
-        //    SelectColumn = "SYSDATE";
-        //    SelectTable = "DUAL";
-        //}
-
+        // DataGrid に表示するためのデータを返却する
         public DataView TableData
         {
             get
             {
-                if (adapter == null)
+                if (adapter == null) Refresh();
+                try
                 {
-                    //if (SqlText == null)
-                    //{
-                    //    SqlText = "SELECT " + SelectColumn + " FROM " + SelectTable;
-                    //}
-                    adapter = new OracleDataAdapter(SqlText, constr);
+                    adapter.Fill(dataset, "TABLE");
+                    return dataset.Tables["TABLE"].DefaultView;
                 }
-                adapter.Fill(dataset, "TABLE");
-                
-                return dataset.Tables["TABLE"].DefaultView;
+                catch (Exception e)
+                {
+                    conMgr.Message = e.Message;
+                    return null;
+                }                
             }
         }
 
-        // 通知イベント
+        private void Refresh()
+        {
+            // DataSet を初期化して DataAdapter を再セット
+            dataset.Dispose();
+            dataset = new DataSet();
+            adapter = new OracleDataAdapter(SqlText, conMgr.Connection);
+            NotifyPropertyChanged("TableData");
+        }
+
+        private void OnConnectionChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "Connection") return;
+            Refresh();
+        }
+
+        public OracleDataSet()
+        {
+            conMgr.PropertyChanged += OnConnectionChanged;
+        }
+
         private void NotifyPropertyChanged(string propertyName)
         {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
