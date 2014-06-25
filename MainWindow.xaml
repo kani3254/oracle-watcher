@@ -1,10 +1,10 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:oracle" x:Class="oracle.MainWindow"
+        xmlns:local="clr-namespace:oracle" x:Name="window" x:Class="oracle.MainWindow"
         Title="ちら美" Height="350" Width="525">
     <Window.DataContext>
-        <Binding Source="{x:Static local:OracleConnectionManager.Instance}" />
+        <local:OracleDataPager/>
     </Window.DataContext>
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
@@ -21,7 +21,10 @@
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <StackPanel x:Name="ConnectionPanel" Grid.Row="0" Orientation="Horizontal">
+            <StackPanel.DataContext>
+                <Binding Source="{x:Static local:OracleConnectionManager.Instance}" />
+            </StackPanel.DataContext>
             <TextBox Text="{Binding UserID}" Margin="5" MinWidth="50" />
             <TextBox Text="{Binding Password}" Margin="5" MinWidth="50" />
             <TextBox Text="{Binding Ezconstr}" Margin="5" MinWidth="200" />
@@ -30,7 +33,7 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME"
                       SelectedValuePath="TABLE_NAME"
-                      SelectedValue="{Binding DataContext.SelectTable, ElementName=dataGrid}">
+                      SelectedValue="{Binding DataContext.Table, ElementName=window}">
                 <ComboBox.DataContext>
                     <local:OracleDataSet SqlText="select owner || '.' || table_name as TABLE_NAME from all_tables" />
                 </ComboBox.DataContext>
@@ -49,9 +52,6 @@
             <Button Content="ぐるぐる" Margin="5" Width="75" Command="{Binding Mode=OneWay}"/>
         </StackPanel>
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <StackPanel.DataContext>
-                <local:OracleDataPager />
-            </StackPanel.DataContext>
             <TextBlock Text="{Binding Count, StringFormat=全{0:N0}件}" Margin="5"/>
             <Button Content="|&lt;" Margin="5"/>
             <Button Content="&lt;&lt;" Margin="5"/>
@@ -66,11 +66,11 @@
             <TextBlock Text="/Page" Margin="5"/>
         </StackPanel>
         <DataGrid Grid.Row="5" x:Name="dataGrid" ItemsSource="{Binding TableData}" Margin="5">
-            <DataGrid.DataContext>
+            <!--<DataGrid.DataContext>
                 <local:OracleDataSet/>
-            </DataGrid.DataContext>
+            </DataGrid.DataContext>-->
         </DataGrid>
-        <TextBlock Grid.Row="6" Text="{Binding Message}" />
+        <TextBlock Grid.Row="6" Text="{Binding DataContext.Message, ElementName=ConnectionPanel}" />
 
     </Grid>
 </Window>

@@ -74,17 +74,17 @@ namespace oracle
         }
         
         // テーブル名を格納するプロパティ
-        public static readonly DependencyProperty SelectTableProperty =
-            DependencyProperty.Register("SelectTable", typeof(String), typeof(OracleDataSet),
-                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnSelectTableChanged)));
-        public String SelectTable
+        public static readonly DependencyProperty TableProperty =
+            DependencyProperty.Register("Table", typeof(String), typeof(OracleDataPager),
+                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnTableChanged)));
+        public String Table
         {
-            get { return (String)GetValue(SelectTableProperty); }
-            set { SetValue(SelectTableProperty, value); }
+            get { return (String)GetValue(TableProperty); }
+            set { SetValue(TableProperty, value); }
         }
         
         // テーブル名 が変更されたときにデータをリセットする
-        private static void OnSelectTableChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        private static void OnTableChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             OracleDataPager oracleDataPager = obj as OracleDataPager;
             
@@ -100,8 +100,8 @@ namespace oracle
         {
             get
             {
-                return null;
-//                return dataset.Tables[SelectTable].DefaultView;
+                if (cursor == null) return null;
+                return dataset.Tables[Table].DefaultView;
             }
         }
         
@@ -115,24 +115,30 @@ namespace oracle
         {
             NotifyPropertyChanged("TableData");
         }
-        
-        // ページ数を再計算
+
+        // ページ数をリセット
         private void ResetPageCount()
         {
-            _pageCount = Count / PerPage;
+            _pageCount = (Count - 1) / PerPage + 1;
             NotifyPropertyChanged("PageCount");
         }
         
-        // 件数、カーソルをリセット
+        // 件数をリセット
         private void ResetData()
         {
             // 件数を取得
-            command.CommandText = "SELECT COUNT(1) FROM " + SelectTable;
-            _count = (int)command.ExecuteScalar();
-            
+            command.CommandText = "SELECT COUNT(1) FROM " + Table;
+            _count = Convert.ToInt32(command.ExecuteScalar());
+            NotifyPropertyChanged("Count");
+            ResetPageCount();
+        }
+        
+        // データを再取得
+        private void FetchData()
+        {
             // カーソルを取得
             if (cursor != null) cursor.Dispose();
-            command.CommandText = "BEGIN OPEN :1 FOR SELECT * FROM " + SelectTable + "; end;";
+            command.CommandText = "BEGIN OPEN :1 FOR SELECT * FROM " + Table + "; end;";
             OracleParameter p_rc = command.Parameters.Add(
                 "p_rc",
                 OracleDbType.RefCursor,
@@ -141,15 +147,10 @@ namespace oracle
             command.ExecuteNonQuery();
             command.Parameters.Clear();
             cursor = p_rc.Value as OracleRefCursor;
-        }
-        
-        // データを再取得
-        private void FetchData()
-        {
             // データセットを再構築
             dataset.Dispose();
             dataset = new DataSet();
-            adapter.Fill(dataset, (Page * PerPage) + 1, PerPage, SelectTable, cursor);
+            adapter.Fill(dataset, (Page - 1) * PerPage, PerPage, Table, cursor);
             NotifyPropertyChanged("TableData");
         }
         

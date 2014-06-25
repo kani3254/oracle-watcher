@@ -14,7 +14,7 @@ namespace oracle
         {
             InitializeComponent();
             DefaultTimer ti = this.timer.DataContext as DefaultTimer;
-            OracleDataSet ds = this.dataGrid.DataContext as OracleDataSet;
+            OracleDataPager ds = this.DataContext as OracleDataPager;
             ti.Timer.Tick += new EventHandler(ds.EventHandler);
         }
 

@@ -62,7 +62,7 @@ namespace oracle
 
                 OracleConnection testConn = new OracleConnection(builder.ConnectionString);
                 testConn.Open();
-                testConn.Close();
+                //testConn.Close();
                 _connection = testConn;
                 NotifyPropertyChanged("Connection");
 
