@@ -17,6 +17,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -47,12 +48,29 @@
             <TextBox Text="{Binding Timer.Interval}" Margin="5"/>
             <Button Content="ぐるぐる" Margin="5" Width="75" Command="{Binding Mode=OneWay}"/>
         </StackPanel>
-        <DataGrid x:Name="dataGrid" Grid.Row="4" ItemsSource="{Binding TableData}" Margin="5" >
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel.DataContext>
+                <local:OracleDataPager />
+            </StackPanel.DataContext>
+            <TextBlock Text="{Binding Count, StringFormat=全{0:N0}件}" Margin="5"/>
+            <Button Content="|&lt;" Margin="5"/>
+            <Button Content="&lt;&lt;" Margin="5"/>
+            <Button Content="&lt;" Margin="5"/>
+            <TextBlock Text="1 2 3 4 5 ..." Margin="5"/>
+            <TextBox Text="{Binding Page}" Margin="5"/>
+            <TextBlock Text="{Binding PageCount, StringFormat=/{0:N0}}" Margin="5"/>
+            <Button Content="&gt;" Margin="5"/>
+            <Button Content="&gt;&gt;" Margin="5"/>
+            <Button Content="&gt;|" Margin="5"/>
+            <TextBox Text="{Binding PerPage}" Margin="5"/>
+            <TextBlock Text="/Page" Margin="5"/>
+        </StackPanel>
+        <DataGrid Grid.Row="5" x:Name="dataGrid" ItemsSource="{Binding TableData}" Margin="5">
             <DataGrid.DataContext>
                 <local:OracleDataSet/>
             </DataGrid.DataContext>
         </DataGrid>
-        <TextBlock Grid.Row="5" Text="{Binding Message}" />
+        <TextBlock Grid.Row="6" Text="{Binding Message}" />
 
     </Grid>
 </Window>

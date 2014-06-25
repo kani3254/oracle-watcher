@@ -82,6 +82,7 @@
   <ItemGroup>
     <Compile Include="OracleConnectionManager.cs" />
     <Compile Include="OracleDataSet.cs" />
+    <Compile Include="OracleDataPager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -119,7 +120,8 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="OraOps11w.dll" DestinationFolder="$(OutputPath)" />
+  </Target>
 </Project>
