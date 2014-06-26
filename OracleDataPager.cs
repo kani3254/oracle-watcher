@@ -24,12 +24,10 @@ namespace oracle
         }
 
         // テーブルの件数
-        private int _count = 0;
-        public int Count { get { return _count; } }
+        public int Count { get; private set; }
         
         // ページ数
-        private int _pageCount = 0;
-        public int PageCount { get { return _pageCount; } }
+        public int PageCount { get; private set; }
         
         // ページごとの件数
         public static readonly DependencyProperty PerPageProperty =
@@ -66,9 +64,13 @@ namespace oracle
         private static void OnPageChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
             OracleDataPager oracleDataPager = obj as OracleDataPager;
-            
+            // 値の強制。。。。こうなの？
+            if (oracleDataPager.Page < 1) oracleDataPager.Page = 1;
+            if (oracleDataPager.Page > oracleDataPager.PageCount) oracleDataPager.Page = oracleDataPager.PageCount;
+
             if (oracleDataPager != null)
             {
+                oracleDataPager.ResetCursor();
                 oracleDataPager.FetchData();
             }
         }
@@ -112,10 +114,10 @@ namespace oracle
             
             if (oracleDataPager != null)
             {
+                oracleDataPager.ResetCount();
                 oracleDataPager.Page = 1;
-                oracleDataPager.ResetData();
+                oracleDataPager.ResetCursor();
                 oracleDataPager.FetchData();
-                oracleDataPager.NotifyPropertyChanged("TableData");
             }
         }
         
@@ -132,36 +134,38 @@ namespace oracle
         // コンストラクタ
         public OracleDataPager()
         {
+            Count = 0;
+            PageCount = 0;
             conMgr.PropertyChanged += OnConnectionChanged;
         }
         
         public void EventHandler(object sender, EventArgs e)
         {
-            NotifyPropertyChanged("TableData");
+            ResetCursor();
+            FetchData();
         }
 
         // ページ数をリセット
         private void ResetPageCount()
         {
-            _pageCount = (Count - 1) / PerPage + 1;
+            PageCount = (Count - 1) / PerPage + 1;
             NotifyPropertyChanged("PageCount");
         }
         
         // 件数をリセット
-        private void ResetData()
+        private void ResetCount()
         {
             command.CommandText = "SELECT COUNT(1) FROM (" + Sql + ")";
-            _count = Convert.ToInt32(command.ExecuteScalar());
+            Count = Convert.ToInt32(command.ExecuteScalar());
             NotifyPropertyChanged("Count");
             ResetPageCount();
         }
         
-        // データを再取得
-        private void FetchData()
+        // カーソルを取得
+        private void ResetCursor()
         {
-            // カーソルを取得
             if (cursor != null) cursor.Dispose();
-            command.CommandText = "BEGIN OPEN :1 FOR SELECT * FROM " + Table + "; end;";
+            command.CommandText = "BEGIN OPEN :1 FOR SELECT * FROM (" + Sql + "); end;";
             OracleParameter p_rc = command.Parameters.Add(
                 "p_rc",
                 OracleDbType.RefCursor,
@@ -170,13 +174,39 @@ namespace oracle
             command.ExecuteNonQuery();
             command.Parameters.Clear();
             cursor = p_rc.Value as OracleRefCursor;
+        }
+
+        // データを再取得
+        private void FetchData()
+        {
             // データセットを再構築
             dataset.Dispose();
             dataset = new DataSet();
             adapter.Fill(dataset, (Page - 1) * PerPage, PerPage, Table, cursor);
             NotifyPropertyChanged("TableData");
         }
-        
+
+        #region command
+        private DelegateCommand<string> _pageNavigateCommand;
+        public DelegateCommand<string> PageNavigateCommand
+        {
+            get
+            {
+                return _pageNavigateCommand = _pageNavigateCommand ?? new DelegateCommand<string>(DoPageNavigate, CanPageNavigate);
+            }
+        }
+
+        public void DoPageNavigate(string param)
+        {
+            Page += Convert.ToInt32(param);
+        }
+
+        public bool CanPageNavigate(string param)
+        {
+            return true;
+        }
+        #endregion
+
         private void NotifyPropertyChanged(string propertyName)
         {
             PropertyChanged(this, new PropertyChangedEventArgs(propertyName));

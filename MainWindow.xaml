@@ -8,7 +8,7 @@
     </Window.DataContext>
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
-            <EventSetter Event="GotFocus" Handler="TextAllSelect" />
+            <EventSetter Event="UIElement.GotFocus" Handler="TextAllSelect" />
         </Style>
     </Window.Resources>
     <Grid>
@@ -55,15 +55,15 @@
         </StackPanel>
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock Text="{Binding Count, StringFormat=全{0:N0}件}" Margin="5"/>
-            <Button Content="|&lt;" Margin="5"/>
-            <Button Content="&lt;&lt;" Margin="5"/>
-            <Button Content="&lt;" Margin="5"/>
+            <Button Content="|&lt;" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="-999999999"/>
+            <Button Content="&lt;&lt;" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="-5"/>
+            <Button Content="&lt;" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="-1"/>
             <TextBlock Text="1 2 3 4 5 ..." Margin="5"/>
             <TextBox Text="{Binding Page}" Margin="5"/>
             <TextBlock Text="{Binding PageCount, StringFormat=/{0:N0}}" Margin="5"/>
-            <Button Content="&gt;" Margin="5"/>
-            <Button Content="&gt;&gt;" Margin="5"/>
-            <Button Content="&gt;|" Margin="5"/>
+            <Button Content="&gt;" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="+1"/>
+            <Button Content="&gt;&gt;" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="+5"/>
+            <Button Content="&gt;|" Margin="5" Command="{Binding PageNavigateCommand, Mode=OneWay}" CommandParameter="+999999999"/>
             <TextBox Text="{Binding PerPage}" Margin="5"/>
             <TextBlock Text="/Page" Margin="5"/>
         </StackPanel>
