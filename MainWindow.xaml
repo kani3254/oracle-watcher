@@ -31,17 +31,19 @@
             <Button Content="つなぐ" Margin="5" Width="75" Command="{Binding Mode=OneWay}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}" DisplayMemberPath="TABLE_NAME"
+            <StackPanel.DataContext>
+                <local:OracleDataSet SqlText="select owner || '.' || table_name as TABLE_NAME from all_tables" />
+            </StackPanel.DataContext>
+            <ComboBox x:Name="TableSelector" Width="Auto" Margin="5" ItemsSource="{Binding TableData}"
+                      DisplayMemberPath="TABLE_NAME"
                       SelectedValuePath="TABLE_NAME"
                       SelectedValue="{Binding DataContext.Table, ElementName=window}">
-                <ComboBox.DataContext>
-                    <local:OracleDataSet SqlText="select owner || '.' || table_name as TABLE_NAME from all_tables" />
-                </ComboBox.DataContext>
             </ComboBox>
-            <TextBox Text="{Binding DataContext.SqlText, ElementName=TableSelector}" Margin="5" />
+            <TextBox Text="{Binding SqlText}" Margin="5" />
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <TextBox Text="{Binding DataContext.SqlText, ElementName=dataGrid}" Margin="5" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="50" AcceptsReturn="True" />
+            <TextBox Text="{Binding Sql}" Margin="5" VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto" Height="50" AcceptsReturn="True" />
         </StackPanel>
         <StackPanel Name="timer" Grid.Row="3" Orientation="Horizontal">
             <StackPanel.DataContext>
@@ -65,11 +67,7 @@
             <TextBox Text="{Binding PerPage}" Margin="5"/>
             <TextBlock Text="/Page" Margin="5"/>
         </StackPanel>
-        <DataGrid Grid.Row="5" x:Name="dataGrid" ItemsSource="{Binding TableData}" Margin="5">
-            <!--<DataGrid.DataContext>
-                <local:OracleDataSet/>
-            </DataGrid.DataContext>-->
-        </DataGrid>
+        <DataGrid Grid.Row="5" x:Name="dataGrid" ItemsSource="{Binding TableData}" Margin="5" />
         <TextBlock Grid.Row="6" Text="{Binding DataContext.Message, ElementName=ConnectionPanel}" />
 
     </Grid>

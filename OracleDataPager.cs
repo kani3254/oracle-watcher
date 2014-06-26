@@ -90,8 +90,32 @@ namespace oracle
             
             if (oracleDataPager != null)
             {
+                oracleDataPager.Sql = "SELECT * FROM " + (String)e.NewValue;
+            }
+        }
+        
+        // SQL文字列を格納するプロパティ
+        public static readonly DependencyProperty SqlProperty =
+            DependencyProperty.Register("Sql", typeof(String), typeof(OracleDataPager),
+                new FrameworkPropertyMetadata("SELECT SYSDATE FROM DUAL",
+                    new PropertyChangedCallback(OnSqlChanged) ));
+        public String Sql
+        {
+            get { return (String)GetValue(SqlProperty); }
+            set { SetValue(SqlProperty, value); }
+        }
+        
+        // Sql が変更されたときに OracleDataAdapter を作成しなおす
+        private static void OnSqlChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            OracleDataPager oracleDataPager = obj as OracleDataPager;
+            
+            if (oracleDataPager != null)
+            {
+                oracleDataPager.Page = 1;
                 oracleDataPager.ResetData();
-                oracleDataPager.Page = 0;
+                oracleDataPager.FetchData();
+                oracleDataPager.NotifyPropertyChanged("TableData");
             }
         }
         
@@ -126,8 +150,7 @@ namespace oracle
         // 件数をリセット
         private void ResetData()
         {
-            // 件数を取得
-            command.CommandText = "SELECT COUNT(1) FROM " + Table;
+            command.CommandText = "SELECT COUNT(1) FROM (" + Sql + ")";
             _count = Convert.ToInt32(command.ExecuteScalar());
             NotifyPropertyChanged("Count");
             ResetPageCount();
